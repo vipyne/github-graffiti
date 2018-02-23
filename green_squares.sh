@@ -75,9 +75,8 @@ if [[ 1 -ne "$DRYRUN" ]]; then
   UNIXTIME=$UNIXTIMEAYEARAGO
   echo "$UNIXTIMEAYEARAGO"
 else
-  UNIXTIME=1487739600
+  UNIXTIME=1487739600 # Feb 22, 2018 I think; no particular reason for this default
 fi
-
 
 mkdir ../"$REPONAME"
 echo narf1
@@ -94,15 +93,12 @@ git commit -m "initial commit of the script responsible for drawing pictures wit
 STRING="1111111111111111111111111111199911199999111999991119999919999919999911199911111111111111111111111111111119999999111111911111191111119111111199999991111111911111191111119999999911111191111111111111911111191111119999999911111191111111111111999999911111191111119111111911111111191111119111911991911199991199991199991111999911119999111991911191119119111111111111111111"
 
 rewriteHistory() {
+  WORKING=true
   for i in $(seq 1 ${#STRING}); do
     INNERLOOP="${STRING:i-1:1}"
     for j in $( seq 1 $(($INNERLOOP * 4)) ); do
       # # github is *not* liking how many files this produces:
       touch "$i-$j-unixtime" # sorry github
-      # # so...
-      # # I feel like I tried this and it didn't work before.
-      # echo "$i-$j" >> something
-      # # yup, doesn't work
       git add .
       git commit -m "commit number $i : $j"
       COMMITTIME=$(($UNIXTIME + $j * 10))
@@ -113,12 +109,13 @@ rewriteHistory() {
   # 86400 seconds in a day
     UNIXTIME=$(($UNIXTIME + 86400))
   done > /dev/null
+  WORKING=false
 }
 
 whistleWhileYouWork() {
   WORKCOUNT=1
   echo
-  while true; do
+  while $WORKING; do
     seq -s~ $WORKCOUNT|tr -d '[:digit:]'
     echo -ne "|\r"
     sleep 1
@@ -126,14 +123,13 @@ whistleWhileYouWork() {
   done
 }
 
-
 mkdir unixtime
 cd unixtime || exit
 
 touch something
 
-rewriteHistory & #quit out of this background process when quit
-whistleWhileYouWork
+rewriteHistory # & TODO: get the background process of this to work so that we can whistle while we work!
+# whistleWhileYouWork
 
 if [[ 1 -ne "$DRYRUN" ]]; then
   git remote add origin git@github.com:"$USERNAME"/"$REPONAME".git
