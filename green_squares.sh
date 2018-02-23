@@ -75,7 +75,10 @@ if [[ 1 -ne "$DRYRUN" ]]; then
 fi
 
 
-mkdir ../"$REPONAME" && cd ../"$REPONAME"
+mkdir ../"$REPONAME"
+echo narf1
+cd ../"$REPONAME"
+echo narf2
 
 rm -rf unixtime
 rm -rf .git
@@ -86,7 +89,41 @@ git commit -m "initial commit of the script responsible for drawing pictures wit
 
 STRING="1111111111111111111111111111199911199999111999991119999919999919999911199911111111111111111111111111111119999999111111911111191111119111111199999991111111911111191111119999999911111191111111111111911111191111119999999911111191111111111111999999911111191111119111111911111111191111119111911991911199991199991199991111999911119999111991911191119119111111111111111111"
 
+rewriteHistory() {
+  for i in $(seq 1 ${#STRING}); do
+    INNERLOOP="${STRING:i-1:1}"
+    for j in $( seq 1 $(($INNERLOOP * 4)) ); do
+      # # github is *not* liking how many files this produces:
+      touch "$i-$j-unixtime" # sorry github
+      # # so...
+      # # I feel like I tried this and it didn't work before.
+      # echo "$i-$j" >> something
+      # # yup, doesn't work
+      git add .
+      git commit -m "commit number $i : $j"
+      COMMITTIME=$(($UNIXTIME + $j * 10))
+      git commit --amend --no-edit --date "$COMMITTIME"
+      wait
+    done
+    wait
+  # 86400 seconds in a day
+    UNIXTIME=$(($UNIXTIME + 86400))
+  done > /dev/null
+}
 
+whistleWhileYouWork() {
+  WORKCOUNT=1
+  while true; do
+    N=((10))
+    printf %"$N"s |tr " " "#"
+    NARF=$(printf %`$WORKCOUNT`s |tr " " "#")
+    echo "$NARF"
+    echo "(($WORKCOUNT))"
+    echo -ne "$NARF\r"
+    sleep 1
+    ((WORKCOUNT+=1))
+  done
+}
 
 UNIXTIME=1487739600
 
@@ -95,25 +132,8 @@ cd unixtime || exit
 
 touch something
 
-for i in $(seq 1 ${#STRING}); do
-  INNERLOOP="${STRING:i-1:1}"
-  for j in $( seq 1 $(($INNERLOOP * 4)) ); do
-    # # github is *not* liking how many files this produces:
-    touch "$i-$j-unixtime" # sorry github
-    # # so...
-    # # I feel like I tried this and it didn't work before.
-    # echo "$i-$j" >> something
-    # # yup, doesn't work
-    git add .
-    git commit -m "commit number $i : $j"
-    COMMITTIME=$(($UNIXTIME + $j * 10))
-    git commit --amend --no-edit --date "$COMMITTIME"
-    wait
-  done
-  wait
-# 86400 seconds in a day
-  UNIXTIME=$(($UNIXTIME + 86400))
-done > /dev/null
+# rewriteHistory & /// quit out of this background process when quit
+whistleWhileYouWork
 
 if [[ 1 -ne "$DRYRUN" ]]; then
   git remote add origin git@github.com:"$USERNAME"/"$REPONAME".git
