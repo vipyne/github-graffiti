@@ -2,6 +2,8 @@
 
 # automate a bunch of bogus commits and backdate them to turn all the squares green...
 
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+
 if [[ "${#@}" -lt 2 ]]; then
   echo " ##"
   echo " #  Please add at least 2 args"
@@ -72,6 +74,8 @@ if [[ 1 -ne "$DRYRUN" ]]; then
   # #                   $ date -j -f "%b %d %Y %T" "Apr 05 2016 00:00:00" "+%s"
   UNIXTIME=$UNIXTIMEAYEARAGO
   echo "$UNIXTIMEAYEARAGO"
+else
+  UNIXTIME=1487739600
 fi
 
 
@@ -113,26 +117,22 @@ rewriteHistory() {
 
 whistleWhileYouWork() {
   WORKCOUNT=1
+  echo
   while true; do
-    N=((10))
-    printf %"$N"s |tr " " "#"
-    NARF=$(printf %`$WORKCOUNT`s |tr " " "#")
-    echo "$NARF"
-    echo "(($WORKCOUNT))"
-    echo -ne "$NARF\r"
+    seq -s~ $WORKCOUNT|tr -d '[:digit:]'
+    echo -ne "|\r"
     sleep 1
     ((WORKCOUNT+=1))
   done
 }
 
-UNIXTIME=1487739600
 
 mkdir unixtime
 cd unixtime || exit
 
 touch something
 
-# rewriteHistory & /// quit out of this background process when quit
+rewriteHistory & #quit out of this background process when quit
 whistleWhileYouWork
 
 if [[ 1 -ne "$DRYRUN" ]]; then
@@ -143,7 +143,6 @@ if [[ 1 -ne "$DRYRUN" ]]; then
 fi
 
 echo 'done'
-
 
 # http://vipyne.tumblr.com/post/155636272150/insert-back-to-the-future-joke-here
 
