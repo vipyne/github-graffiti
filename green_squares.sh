@@ -25,7 +25,7 @@ end
 puts out_string += '1111111' # add a couple extra days for in progress week
 ")
 
-echo $GRAFITTI_DESIGN
+# echo $GRAFITTI_DESIGN
 
 if [[ "${#@}" -lt 2 ]]; then
   echo " ##"
@@ -102,9 +102,7 @@ else
 fi
 
 mkdir ../"$REPONAME"
-echo narf1
 cd ../"$REPONAME"
-echo narf2
 
 rm -rf unixtime
 rm -rf .git
