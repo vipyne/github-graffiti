@@ -25,23 +25,28 @@ end
 puts out_string += '1111111' # add a couple extra days for in progress week
 ")
 
-# echo $GRAFITTI_DESIGN
-
 if [[ "${#@}" -lt 2 ]]; then
   echo " ##"
   echo " #  Please add at least 2 args"
+  echo " # 1 github username"
+  echo " # 2 repo name"
+  echo " # 3 (optional) dryrun - DON'T create repo and push to github "
   echo " # "
   echo " #  usage:"
-  echo " #   $ ./green_squares.sh <github username> <repo name> [create repo and push to github - leave blank if NO]"
+  echo " #   $ ./green_squares.sh <github username> <repo name> [dryrun]"
   echo " ##"
   exit
 fi
 
 USERNAME="$1"
 REPONAME="$2"
-DRYRUN="$3" # 1
+DRYRUN="$3"
 
-if [[ 1 -ne "$DRYRUN" ]]; then
+if [[ "$DRYRUN" ]]; then
+  echo "dryrun -- NOT creating repo on github"
+  UNIXTIME=1487739600 # Feb 22, 2018 I think; no particular reason for this default
+else
+  echo "creating repo on github"
   # create repo on github
   DATA_OPTS="{ \"name\":\"$REPONAME\" }"
   curl -i -X POST -u "$USERNAME" -d "$DATA_OPTS" https://api.github.com/user/repos > /dev/null
@@ -97,11 +102,9 @@ if [[ 1 -ne "$DRYRUN" ]]; then
   # #                   $ date -j -f "%b %d %Y %T" "Apr 05 2016 00:00:00" "+%s"
   UNIXTIME=$UNIXTIMEAYEARAGO
   echo "$UNIXTIMEAYEARAGO"
-else
-  UNIXTIME=1487739600 # Feb 22, 2018 I think; no particular reason for this default
 fi
 
-mkdir ../"$REPONAME"
+mkdir ../"$REPONAME" || exit
 cd ../"$REPONAME"
 
 rm -rf unixtime
@@ -131,16 +134,16 @@ rewriteHistory() {
   WORKING=false
 }
 
-whistleWhileYouWork() {
-  WORKCOUNT=1
-  echo
-  while $WORKING; do
-    seq -s~ $WORKCOUNT|tr -d '[:digit:]'
-    echo -ne "|\r"
-    sleep 1
-    ((WORKCOUNT+=1))
-  done
-}
+# whistleWhileYouWork() {
+#   WORKCOUNT=1
+#   echo
+#   while $WORKING; do
+#     seq -s~ $WORKCOUNT|tr -d '[:digit:]'
+#     echo -ne "|\r"
+#     sleep 1
+#     ((WORKCOUNT+=1))
+#   done
+# }
 
 mkdir unixtime
 cd unixtime || exit
@@ -150,7 +153,7 @@ touch something
 rewriteHistory # & TODO: get the background process of this to work so that we can whistle while we work!
 # whistleWhileYouWork
 
-if [[ 1 -ne "$DRYRUN" ]]; then
+if [[   "$DRYRUN" ]]; then
   git remote add origin git@github.com:"$USERNAME"/"$REPONAME".git
   git push -u origin master
   wait
