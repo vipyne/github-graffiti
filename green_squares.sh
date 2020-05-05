@@ -4,15 +4,7 @@
 
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
-GRAFITTI_DESIGN=$(ruby -e " string_w_newlines = '
-1111191119111118111181888881888881811111111181111111
-1111999199911118111181118111118111811111111888111111
-1111999999911118111181118111118111811118888888888811
-1111999999911118111181118111118111811111188888881111
-1111199999111118111181118111118111811111118818811111
-1111119991111118111181118111118111811111188111881111
-1111111911111118888181118111118111888811811111118111
-'
+GRAFITTI_DESIGN=$(ruby -e " string_w_newlines = '99999900000033333366666699999900000033333366666699999999900000033333366666699999900000033333366666699999999900000033333366666699999900000033333366666699999999900000033333366666699999900000033333366666699999909900000033333366666699999900000033333366666699999900900000033333366666699999900000033333366666699999900000000033333366666699999900000033333366666699999000000'
 height = 7 # days
 width = 52 # weeks
 in_string = string_w_newlines.gsub(/\n/, '')
@@ -115,12 +107,14 @@ git add .
 git commit -m "initial commit of the script responsible for drawing pictures with green squares"
 
 rewriteHistory() {
+  for i in $(seq 1 ${#GRAFITTI_DESIGN}); do
+    touch "$i-file"
+  done > /dev/null
   WORKING=true
   for i in $(seq 1 ${#GRAFITTI_DESIGN}); do
     INNERLOOP="${GRAFITTI_DESIGN:i-1:1}"
     for j in $( seq 1 $(($INNERLOOP * 4)) ); do
-      # # github is *not* liking how many files this produces:
-      touch "$i-$j-unixtime" # sorry github
+      echo 'square $j' >> "$i-file"
       git add .
       git commit -m "commit number $i : $j"
       COMMITTIME=$(($UNIXTIME + $j * 10))
@@ -133,6 +127,9 @@ rewriteHistory() {
   done > /dev/null
   WORKING=false
 }
+
+git commit --amend --no-edit --date "$(date -j -f "%b %d %Y %T" "Feb 28 2020 11:08:19" "+%s")"
+UNIXTIMEAYEARAGO=$(date -j -f "%b %d %Y %T" "Feb 23 2020 12:00:00" "+%s")
 
 # whistleWhileYouWork() {
 #   WORKCOUNT=1
